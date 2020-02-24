@@ -8,16 +8,16 @@ defmodule MyMathTest do
     assert MyMath.is_pure(9) == {:ok, 3}
     assert MyMath.is_pure(16) == {:ok, 4}
   end
- 
-  test "Squre root 103" do
+
+  test "Square root 103" do
     a = MyMath.sqrt(103) |> Float.ceil(5)
     b = :math.sqrt(103) |> Float.ceil(5)
     assert a == b
   end
 
   test "Negative square root" do
-    assert_raise RuntimeError, "Square root of a negative number doesn't exist", fn -> 
-      MyMath.sqrt -2
+    assert_raise RuntimeError, "Square root of a negative number doesn't exist", fn ->
+      MyMath.sqrt(-2)
     end
   end
 
@@ -26,12 +26,10 @@ defmodule MyMathTest do
     b = :math.sqrt(10.32) |> Float.ceil(5)
     assert a == b
   end
-  
+
   test "Square root 10212.003342" do
     a = MyMath.sqrt(10212.003342) |> Float.ceil(5)
     b = :math.sqrt(10212.003342) |> Float.ceil(5)
     assert a == b
   end
-
-
 end
