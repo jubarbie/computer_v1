@@ -1,25 +1,29 @@
 defmodule EqParser do
   def parseABC(str) do
-    eq = String.replace(str, ~r/ +/, "")
+    # Removing all spaces
+    eq = str |> String.replace(~r/\s+/, "") |> String.split("=")
 
-    regex =
-      ~r/^((?<a>( *)[+-]?( *)\d*( *))\*?( *)X( *)\^?( *)2)?((?<b>( *)[+-]( *)\d*( *))\*?( *)X( *)(\^?1)?( *))?((?<c>( *)[+-]( *)\d+)(\*?( *)X( *)\^?0)?)?$/i
+    IO.puts(eq)
+    regex = ~r/(?<a>[+-]?\d*(\*)?x(\^)?2)/i
 
-    captured =
-      Map.merge(
-        %{"a" => "0", "b" => "0", "c" => "0"},
-        Regex.named_captures(regex, eq, capture: :all_names)
-      )
+    captured = Regex.named_captures(regex, eq, capture: :all, global: true)
 
-    parsed = parseABCtoInt(captured)
+    # captured
+    #   Map.merge(
+    #     %{"a" => "0", "b" => "0", "c" => "0"},
+    #     Regex.named_captures(regex, eq, capture: :all_names, global: true)
+    #   )
+
+    # parsed = parseABCtoInt(captured)
     IO.inspect(captured)
-    IO.inspect(parsed)
+
+    # IO.inspect(parsed)
 
     case captured |> parseABCtoInt do
       [{a, ""}, {b, ""}, {c, ""}] -> {:ok, %{a: a, b: b, c: c}}
       [{b, ""}, {c, ""}] -> {:ok, %{a: b, b: c}}
       [{c, ""}] -> {:ok, %{a: c}}
-      _ -> {:error, "Malformed equation"}
+      err -> err
     end
   end
 
@@ -29,8 +33,7 @@ defmodule EqParser do
 
   def parseABCtoInt(i) do
     IO.inspect(i)
-    IO.puts("Malformed equation")
-    # System.halt(0)
+    {:error, "Malformed equation"}
   end
 
   def parseNb("") do
