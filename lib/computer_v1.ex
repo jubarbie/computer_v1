@@ -1,7 +1,13 @@
 defmodule ComputerV1 do
   def display({nb_sol, result}, prec) do
-    IO.puts("#{result[:a]}x^2 + #{result[:b]}x + #{result[:c]} = 0")
-    IO.puts("Disciminant: #{result[:delta] |> Float.round(prec)}")
+    if result |> List.keymember?(:c, 0) do
+      IO.puts("Reduced form: #{result[:c]} * X^0 + #{result[:b]} * X^1 + #{result[:a]} * X^2 = 0")
+      IO.puts("Polynominal degree: 2")
+      IO.puts("Disciminant: #{result[:delta] |> Float.round(prec)}")
+    else
+      IO.puts("Reduced form: #{result[:b]} * X^0 + #{result[:a]} * X^1 = 0")
+      IO.puts("Polynominal degree: 1")
+    end
 
     case nb_sol do
       :nosol ->
@@ -18,6 +24,9 @@ defmodule ComputerV1 do
         )
     end
   end
+
+  def dispatchResolution(%{a: 0, b: b, c: c}), do: Degree1.resolve(%{a: b, b: c})
+  def dispatchResolution(%{a: _, b: _, c: _} = e), do: Degree2.resolve(e)
 end
 
 defmodule ComputerV1.CLI do
@@ -32,14 +41,23 @@ defmodule ComputerV1.CLI do
     {opts, params, _} =
       OptionParser.parse(args, switches: [precision: :integer], aliases: [p: :precision])
 
+    if opts[:precision] < 0 || opts[:precision] > 15 do
+      usage()
+      System.halt(0)
+    end
+
     {opts, params}
   end
 
   defp response({opts, coef}) do
     case length(coef) do
-      3 ->
-        [{a, _}, {b, _}, {c, _}] = Enum.map(coef, fn co -> Float.parse(co) end)
-        [a: a, b: b, c: c] |> Degree2.resolve() |> ComputerV1.display(opts[:precision] || 5)
+      1 ->
+        List.first(coef)
+        |> EqParser.fromString()
+        |> ErrorHandler.checkResult()
+        |> ComputerV1.dispatchResolution()
+        |> ErrorHandler.checkResult()
+        |> ComputerV1.display(opts[:precision] || 5)
 
       _ ->
         usage()
@@ -49,6 +67,6 @@ defmodule ComputerV1.CLI do
   end
 
   defp usage() do
-    IO.puts("usage: computer_v1 [-p] [equation]")
+    IO.puts("usage: computer_v1 [-p precision (0..15)] [equation]")
   end
 end

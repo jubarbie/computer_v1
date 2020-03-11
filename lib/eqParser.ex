@@ -7,31 +7,35 @@ defmodule EqParser do
     |> parseEquation
   end
 
-  def parseEquation([left, right]) do
-    case Enum.map([left, right], &parseOperations/1) do
+  def parseEquation([left, right] = s) do
+    case Enum.map(s, &parseOperations/1) do
       [
         ok: leftSeg,
         ok: rightSeg
       ] ->
-        case Enum.map([leftSeg, rightSeg], fn x ->
-               x |> Enum.map(&parseABC/1) |> flatABC
-             end) do
+        case Enum.map([leftSeg, rightSeg], &createModel/1) do
           [%{a: la, b: lb, c: lc}, %{a: ra, b: rb, c: rc}] ->
             {:ok, %{a: la - ra, b: lb - rb, c: lc - rc}}
 
           _ ->
-            {:error, [leftSeg, rightSeg]}
+            {:error, %{message: "Parsing error"}}
         end
 
       _ ->
-        {:error, [left, right]}
+        {:error, %{message: "Parsing error"}}
     end
   end
 
-  def parseEquation(_), do: :error
+  def parseEquation(d), do: {:error, %{message: "Equation must have 2 sides", data: d}}
 
   def createModel(ops) do
-    Enum.map(ops, &parseABC/1) |> flatABC
+    l = Enum.map(ops, &parseABC/1)
+
+    if List.keymember?(l, :error, 0) do
+      {:error, %{message: "Error white parsing"}}
+    else
+      l |> flatABC
+    end
   end
 
   def flatABC(l) do
@@ -47,33 +51,33 @@ defmodule EqParser do
 
   def parseABC(%{sign: sign, segment: seg}) do
     regexes = [
-      ~r/^((?<a>[+-]?\d*)(\*)?X(\^)?2)$/i,
-      ~r/^((?<b>[+-]?\d*)(\*)?X((\^)?1)?)$/i,
-      ~r/^((?<c>[+-]?\d*)(\*)?(X(\^)?0)?)$/i
+      ~r/^((?<a>[+-]?\d*(\.\d*)?)(\*)?X(\^)?2)$/i,
+      ~r/^((?<b>[+-]?\d*(\.\d*)?)(\*)?X((\^)?1)?)$/i,
+      ~r/^((?<c>[+-]?\d*(\.\d*)?)(\*)?(X(\^)?0)?)$/i
     ]
 
     captures = Enum.map(regexes, fn x -> Regex.named_captures(x, seg, capture: :all_names) end)
 
     case captures do
-      [%{"a" => a}, nil, nil] -> getInteger(:a, sign, a)
-      [nil, %{"b" => b}, nil] -> getInteger(:b, sign, b)
-      [nil, nil, %{"c" => c}] -> getInteger(:c, sign, c)
-      _ -> :error
+      [%{"a" => a}, nil, nil] -> getNumber(:a, sign, a)
+      [nil, %{"b" => b}, nil] -> getNumber(:b, sign, b)
+      [nil, nil, %{"c" => c}] -> getNumber(:c, sign, c)
+      _ -> {:error, %{message: "Error while parsing equation: " <> seg}}
     end
   end
 
-  def getInteger(o, sign, "") do
+  def getNumber(o, sign, "") do
     if sign == ?-, do: {:ok, %{o => -1}}, else: {:ok, %{o => 1}}
   end
 
-  def getInteger(o, sign, nb) do
-    IO.inspect(nb)
-
+  def getNumber(o, sign, nb) do
     case Float.parse(nb) do
       {i, ""} -> if sign == ?-, do: {:ok, %{o => i * -1.0}}, else: {:ok, %{o => i}}
       _ -> :error
     end
   end
+
+  def parseOperations(""), do: {:error, %{message: "Empty string"}}
 
   def parseOperations(str) do
     case str |> String.to_charlist() do
@@ -91,10 +95,10 @@ defmodule EqParser do
     if head == ?+ || head == ?- do
       case rest do
         [?+ | _] ->
-          {:error, "Multiple sign not supported"}
+          {:error, %{message: "Multiple sign not supported"}}
 
         [?- | _] ->
-          {:error, "Multiple sign not supported"}
+          {:error, %{message: "Multiple sign not supported"}}
 
         _ ->
           parseOperations(

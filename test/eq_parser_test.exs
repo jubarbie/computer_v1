@@ -4,10 +4,15 @@ defmodule EqParserTest do
   test "Equation parsing test" do
     assert EqParser.fromString("3 * X^2 + 2 * X + 10+ 43*X2=0") == {:ok, %{a: 46, b: 2, c: 10}}
     assert EqParser.fromString("3 * X^2 + 2 * X + 10 = 3x") == {:ok, %{a: 3, b: -1, c: 10}}
-    assert EqParser.fromString("3*X^2+2*X+10=0=43") == :error
-    assert EqParser.fromString("3*X^2+2*X-10") == :error
+
+    assert EqParser.fromString("3*X^2+2*X+10=0=43") ==
+             {:error, %{message: "Equation must have 2 sides", data: ["3*X^2+2*X+10", "0", "43"]}}
+
+    assert EqParser.fromString("3*X^2+2*X-10") ==
+             {:error, %{message: "Equation must have 2 sides", data: ["3*X^2+2*X-10"]}}
+
     assert EqParser.fromString("X^2+2*X-10 = 0") == {:ok, %{a: 1, b: 2, c: -10}}
-    assert EqParser.fromString("2*X-10=2x2+-12") == {:error, ["2*X-10", "2x2+-12"]}
+    assert EqParser.fromString("2*X-10=2x2+-12") == {:error, %{message: "Parsing error"}}
     assert EqParser.fromString("-32*X-10+2X2=2x2+12") == {:ok, %{a: 0, b: -32, c: -22}}
     assert EqParser.fromString("-32*X-10+2.3X2=+12") == {:ok, %{a: 2.3, b: -32, c: -22}}
   end
@@ -42,10 +47,16 @@ defmodule EqParserTest do
     assert EqParser.parseABC(%{sign: ?+, segment: "2X2"}) == {:ok, %{a: 2}}
     assert EqParser.parseABC(%{sign: ?-, segment: "2X2"}) == {:ok, %{a: -2}}
     assert EqParser.parseABC(%{sign: ?-, segment: "2X^2"}) == {:ok, %{a: -2}}
-    assert EqParser.parseABC(%{sign: ?-, segment: "2Y^2"}) == :error
+
+    assert EqParser.parseABC(%{sign: ?-, segment: "2Y^2"}) ==
+             {:error, %{message: "Error while parsing equation: 2Y^2"}}
+
     assert EqParser.parseABC(%{sign: ?-, segment: "2*X^2"}) == {:ok, %{a: -2}}
     assert EqParser.parseABC(%{sign: ?-, segment: "-2*X^2"}) == {:ok, %{a: 2}}
-    assert EqParser.parseABC(%{sign: ?-, segment: "-2*X^3"}) == :error
+
+    assert EqParser.parseABC(%{sign: ?-, segment: "-2*X^3"}) ==
+             {:error, %{message: "Error while parsing equation: -2*X^3"}}
+
     assert EqParser.parseABC(%{sign: ?+, segment: "-203*X^1"}) == {:ok, %{b: -203}}
     assert EqParser.parseABC(%{sign: ?+, segment: "23*X"}) == {:ok, %{b: 23}}
   end
