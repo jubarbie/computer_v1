@@ -7,7 +7,7 @@ defmodule MyMath do
 
   def sqrt(a) do
     case a |> trunc |> is_pure do
-      {:ok, s} -> s
+      {:ok, s} -> if has_dec?(a), do: sqrt(a, s, 2), else: s
       {:nok, s} -> sqrt(a, s, 2)
     end
   end
@@ -39,4 +39,6 @@ defmodule MyMath do
   def absolute(a) when a < 0, do: -a
 
   def absolute(a), do: a
+
+  def has_dec?(a), do: a - trunc(a) != 0
 end
