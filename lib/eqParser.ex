@@ -72,7 +72,7 @@ defmodule EqParser do
 
   def getNumber(o, sign, nb) do
     case Float.parse(nb) do
-      {i, ""} -> if sign == ?-, do: {:ok, %{o => i * -1.0}}, else: {:ok, %{o => i}}
+      {i, ""} -> if sign == ?-, do: {:ok, %{o => i * -1}}, else: {:ok, %{o => i}}
       _ -> :error
     end
   end

@@ -1,12 +1,20 @@
 defmodule ComputerV1 do
   def display({nb_sol, result}, prec) do
-    if result |> List.keymember?(:c, 0) do
-      IO.puts("Reduced form: #{result[:c]} * X^0 + #{result[:b]} * X^1 + #{result[:a]} * X^2 = 0")
-      IO.puts("Polynominal degree: 2")
-      IO.puts("Disciminant: #{result[:delta] |> Float.round(prec)}")
-    else
-      IO.puts("Reduced form: #{result[:b]} * X^0 + #{result[:a]} * X^1 = 0")
-      IO.puts("Polynominal degree: 1")
+    cond do
+      result |> List.keymember?(:c, 0) ->
+        IO.puts(
+          "Reduced form: #{result[:c]} * X^0 + #{result[:b]} * X^1 + #{result[:a]} * X^2 = 0"
+        )
+
+        IO.puts("Polynominal degree: 2")
+        IO.puts("Disciminant: #{result[:delta] |> Float.round(prec)}")
+
+      result |> List.keymember?(:b, 0) ->
+        IO.puts("Reduced form: #{result[:b]} * X^0 + #{result[:a]} * X^1 = 0")
+        IO.puts("Polynominal degree: 1")
+
+      true ->
+        IO.puts("Polynominal degree: 0")
     end
 
     case nb_sol do
@@ -22,10 +30,14 @@ defmodule ComputerV1 do
             result[:x2] |> Float.round(prec)
           }"
         )
+
+      :all ->
+        IO.puts("The equation has an infinite number of solutions")
     end
   end
 
-  def dispatchResolution(%{a: 0, b: b, c: c}), do: Degree1.resolve(%{a: b, b: c})
+  def dispatchResolution(%{a: a, b: b, c: c}) when a == 0 and b == 0, do: Degree0.resolve(%{a: c})
+  def dispatchResolution(%{a: a, b: b, c: c}) when a == 0, do: Degree1.resolve(%{a: b, b: c})
   def dispatchResolution(%{a: _, b: _, c: _} = e), do: Degree2.resolve(e)
 end
 
