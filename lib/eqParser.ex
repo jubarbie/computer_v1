@@ -29,36 +29,35 @@ defmodule EqParser do
   def parseEquation(d), do: {:error, %{message: "Equation must have 2 sides", data: d}}
 
   def createModel(ops) do
-    l = Enum.map(ops, &parseABC/1)
+    l = Enum.map(ops, &parseSegment/1)
 
     if List.keymember?(l, :error, 0) do
       {:error, %{message: "Error white parsing"}}
     else
-      l |> flatABC
+      l |> flatSegments
     end
   end
 
-  def flatABC(l) do
-    Enum.reduce(l, %{a: 0, b: 0, c: 0, error: []}, fn x, acc ->
-      case x do
-        {:ok, %{a: v}} -> %{acc | a: acc[:a] + v}
-        {:ok, %{b: v}} -> %{acc | b: acc[:b] + v}
-        {:ok, %{c: v}} -> %{acc | c: acc[:c] + v}
-        _ -> %{acc | error: acc[:error] ++ x}
-      end
+  def flatSegments(l) do
+    # Il faut séparer les erreurs des ok et rendre la liste des ok en liste sans les ok
+    # On renvois une erreur direct si la liste des erreurs est > 0
+    # {:ok, %{1 => 2}} devient %{1 => 2}
+    # Ensuite on peut faire le reduce
+    Enum.reduce(l, %{error: []}, fn x, acc ->
+      Map.merge(x, acc, fn _k, v1, v2 ->
+        v1 + v2
+      end)
     end)
   end
 
-  def parseABC(%{sign: sign, segment: seg}) do
+  def parseSegment(%{sign: sign, segment: seg}) do
     regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)(\*)?X(\^)?(?<degree>\d*))$/i
 
     capture = Regex.named_captures(regx, seg, capture: :all_names)
-    IO.puts(captures)
+    IO.inspect(capture)
 
     case capture do
-      %{"coeff" => coeff, "degree" => degree} -> getNumber(:a, sign, a)
-      [nil, %{"b" => b}, nil] -> getNumber(:b, sign, b)
-      [nil, nil, %{"c" => c}] -> getNumber(:c, sign, c)
+      %{"coeff" => coeff, "degree" => degree} -> getNumber(degree, sign, coeff)
       _ -> {:error, %{message: "Error while parsing equation: " <> seg}}
     end
   end
@@ -68,8 +67,8 @@ defmodule EqParser do
   end
 
   def getNumber(o, sign, nb) do
-    case Float.parse(nb) do
-      {i, ""} -> if sign == ?-, do: {:ok, %{o => i * -1}}, else: {:ok, %{o => i}}
+    case [Float.parse(nb), Integer.parse(nb)] do
+      [{i, ""}, {j, ""}] -> if sign == ?-, do: {:ok, %{j => i * -1}}, else: {:ok, %{j => i}}
       _ -> :error
     end
   end
