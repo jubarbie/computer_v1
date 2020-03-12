@@ -50,16 +50,13 @@ defmodule EqParser do
   end
 
   def parseABC(%{sign: sign, segment: seg}) do
-    regexes = [
-      ~r/^((?<a>[+-]?\d*(\.\d*)?)(\*)?X(\^)?2)$/i,
-      ~r/^((?<b>[+-]?\d*(\.\d*)?)(\*)?X((\^)?1)?)$/i,
-      ~r/^((?<c>[+-]?\d*(\.\d*)?)(\*)?(X(\^)?0)?)$/i
-    ]
+    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)(\*)?X(\^)?(?<degree>\d*))$/i
 
-    captures = Enum.map(regexes, fn x -> Regex.named_captures(x, seg, capture: :all_names) end)
+    capture = Regex.named_captures(regx, seg, capture: :all_names)
+    IO.puts(captures)
 
-    case captures do
-      [%{"a" => a}, nil, nil] -> getNumber(:a, sign, a)
+    case capture do
+      %{"coeff" => coeff, "degree" => degree} -> getNumber(:a, sign, a)
       [nil, %{"b" => b}, nil] -> getNumber(:b, sign, b)
       [nil, nil, %{"c" => c}] -> getNumber(:c, sign, c)
       _ -> {:error, %{message: "Error while parsing equation: " <> seg}}
