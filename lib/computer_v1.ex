@@ -53,7 +53,7 @@ defmodule ComputerV1.CLI do
     {opts, params, _} =
       OptionParser.parse(args, switches: [precision: :integer], aliases: [p: :precision])
 
-    if opts[:precision] < 0 || opts[:precision] > 15 do
+    if List.keymember?(opts, :precision, 0) && (opts[:precision] < 0 || opts[:precision] > 15) do
       usage()
       System.halt(0)
     end
