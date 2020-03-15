@@ -8,6 +8,8 @@ defmodule EqParser do
     |> addAllDegrees
   end
 
+  def addAllDegrees({:error, e} = err), do: err
+
   def addAllDegrees({:ok, model}) do
       degree = model |> ComputerV1.getEquationDegree
       0..degree
@@ -29,7 +31,7 @@ defmodule EqParser do
             {:ok, merged }
 
           _ ->
-            {:error, %{message: "Parsing errrror"}}
+            {:error, %{message: "Parsing error"}}
         end
 
       _ ->
@@ -50,10 +52,6 @@ defmodule EqParser do
   end
 
   def flatSegments(l) do
-    # Il faut séparer les erreurs des ok et rendre la liste des ok en liste sans les ok
-    # On renvois une erreur direct si la liste des erreurs est > 0
-    # {:ok, %{1 => 2}} devient %{1 => 2}
-    # Ensuite on peut faire le reduce
     errors = Enum.filter(l, fn x -> elem(x, 0) == :error end)
     if (length(errors) > 0) do
         {:error, %{message: "Error while parsing"}}

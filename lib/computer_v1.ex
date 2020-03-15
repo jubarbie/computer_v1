@@ -37,7 +37,9 @@ defmodule ComputerV1 do
   end
 
   def getEquationDegree(model) do
-      model |> Map.keys() |> Enum.reduce(fn x, acc -> if x > acc, do: x, else: acc end)
+      model
+      |> Map.to_list
+      |> Enum.reduce(0, fn {k, v}, d -> if (k > d) && (v != 0), do: k, else: d end)
   end
 
   def dispatchResolution(model) do
@@ -46,7 +48,8 @@ defmodule ComputerV1 do
           1 -> Degree1.resolve(model)
           2 -> Degree2.resolve(model)
           i ->
-            IO.puts("Degree #{i} is too hard for me")
+              IO.puts("Polynominal degree: #{i}")
+            IO.puts("I can't solve it")
             System.halt(0)
         end
   end
