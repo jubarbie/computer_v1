@@ -36,9 +36,20 @@ defmodule ComputerV1 do
     end
   end
 
-  def dispatchResolution(%{a: a, b: b, c: c}) when a == 0 and b == 0, do: Degree0.resolve(%{a: c})
-  def dispatchResolution(%{a: a, b: b, c: c}) when a == 0, do: Degree1.resolve(%{a: b, b: c})
-  def dispatchResolution(%{a: _, b: _, c: _} = e), do: Degree2.resolve(e)
+  def getEquationDegree(model) do
+      model |> Map.keys() |> Enum.reduce(fn x, acc -> if x > acc, do: x, else: acc end)
+  end
+
+  def dispatchResolution(model) do
+      case model |> getEquationDegree() do
+          0 -> Degree0.resolve(model)
+          1 -> Degree1.resolve(model)
+          2 -> Degree2.resolve(model)
+          i ->
+            IO.puts("Degree #{i} is too hard for me")
+            System.halt(0)
+        end
+  end
 end
 
 defmodule ComputerV1.CLI do

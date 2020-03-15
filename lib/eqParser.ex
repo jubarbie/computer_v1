@@ -5,6 +5,16 @@ defmodule EqParser do
     |> String.replace(~r/\s+/, "")
     |> String.split("=")
     |> parseEquation
+    |> addAllDegrees
+  end
+
+  def addAllDegrees({:ok, model}) do
+      degree = model |> ComputerV1.getEquationDegree
+      0..degree
+      |> Enum.map(fn d -> {d, 0} end)
+      |> Map.new
+      |> Map.merge(model)
+      |> (fn model -> {:ok, model} end).()
   end
 
   def parseEquation([left, right] = s) do
@@ -14,11 +24,12 @@ defmodule EqParser do
         ok: rightSeg
       ] ->
         case Enum.map([leftSeg, rightSeg], &createModel/1) do
-          [%{a: la, b: lb, c: lc}, %{a: ra, b: rb, c: rc}] ->
-            {:ok, %{a: la - ra, b: lb - rb, c: lc - rc}}
+          [{:ok, l},{:ok, r}] ->
+              merged = Map.merge(l, r, fn _k, v1, v2 -> v1 - v2 end)
+            {:ok, merged }
 
           _ ->
-            {:error, %{message: "Parsing error"}}
+            {:error, %{message: "Parsing errrror"}}
         end
 
       _ ->
@@ -43,31 +54,39 @@ defmodule EqParser do
     # On renvois une erreur direct si la liste des erreurs est > 0
     # {:ok, %{1 => 2}} devient %{1 => 2}
     # Ensuite on peut faire le reduce
-    Enum.reduce(l, %{error: []}, fn x, acc ->
-      Map.merge(x, acc, fn _k, v1, v2 ->
-        v1 + v2
-      end)
-    end)
+    errors = Enum.filter(l, fn x -> elem(x, 0) == :error end)
+    if (length(errors) > 0) do
+        {:error, %{message: "Error while parsing"}}
+    else
+        flat = l
+        |> Enum.filter(fn x -> elem(x, 0) == :ok end)
+        |> Enum.map(fn x -> elem(x, 1) end)
+        |> Enum.reduce(fn x, acc ->
+          Map.merge(x, acc, fn _k, v1, v2 ->
+            v1 + v2
+          end)
+        end)
+        {:ok, flat}
+    end
   end
 
   def parseSegment(%{sign: sign, segment: seg}) do
-    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)(\*)?X(\^)?(?<degree>\d*))$/i
+    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)((\*)?(?<x>X)((\^)?(?<degree>\d*))?)?)$/i
 
     capture = Regex.named_captures(regx, seg, capture: :all_names)
-    IO.inspect(capture)
 
     case capture do
-      %{"coeff" => coeff, "degree" => degree} -> getNumber(degree, sign, coeff)
+      %{"coeff" => coeff, "degree" => degree, "x" => x} -> getNumber(x, degree, sign, coeff)
       _ -> {:error, %{message: "Error while parsing equation: " <> seg}}
     end
   end
 
-  def getNumber(o, sign, "") do
-    if sign == ?-, do: {:ok, %{o => -1}}, else: {:ok, %{o => 1}}
-  end
 
-  def getNumber(o, sign, nb) do
-    case [Float.parse(nb), Integer.parse(nb)] do
+  def getNumber(x, degree, sign, coeff) do
+      if (x == "" && degree == ""), do: degree = "0"
+      if (x != "" && degree == ""), do: degree = "1"
+      if coeff == "", do: coeff = "1"
+    case [Float.parse(coeff), Integer.parse(degree)] do
       [{i, ""}, {j, ""}] -> if sign == ?-, do: {:ok, %{j => i * -1}}, else: {:ok, %{j => i}}
       _ -> :error
     end

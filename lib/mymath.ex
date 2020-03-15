@@ -41,4 +41,5 @@ defmodule MyMath do
   def absolute(a), do: a
 
   def has_dec?(a), do: a - trunc(a) != 0
+
 end

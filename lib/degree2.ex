@@ -1,11 +1,13 @@
 defmodule Degree2 do
-  def resolve(%{a: a, b: b, c: c} = e) do
+  def resolve(%{2 => a, 1 => b, 0 => c} = e) do
     e |> discriminant |> solution
   end
 
-  def resolve(_), do: {:error, %{message: "Bad argument given to degree 2 resolve"}}
+  def resolve(_) do
+   {:error, %{message: "Bad argument given to degree 2 resolve"}}
+end
 
-  def discriminant(%{a: a, b: b, c: c}) do
+  def discriminant(%{2 => a, 1 => b, 0 => c}) do
     d = b * b - 4 * a * c
     [delta: d, a: a, b: b, c: c]
   end

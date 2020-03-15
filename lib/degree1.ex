@@ -1,5 +1,5 @@
 defmodule Degree1 do
-  def resolve(%{a: a, b: b} = e) do
+  def resolve(%{1 => a, 0 => b} = e) do
     [a: a, b: b] |> solution
   end
 
