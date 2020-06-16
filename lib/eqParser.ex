@@ -5,22 +5,16 @@ defmodule EqParser do
     |> String.replace(~r/\s+/, "")
     |> String.split("=")
     |> parseEquation
-    |> addAllDegrees
   end
 
-  def addAllDegrees({:error, e} = err), do: err
-
-  def addAllDegrees({:ok, model}) do
-    degree = model |> ComputerV1.getEquationDegree()
-
+  def addDegrees(model, degree) do
     0..degree
     |> Enum.map(fn d -> {d, 0} end)
     |> Map.new()
     |> Map.merge(model)
-    |> (fn model -> {:ok, model} end).()
   end
 
-  def parseEquation([left, right] = s) do
+  def parseEquation([_left, _right] = s) do
     case Enum.map(s, &parseOperations/1) do
       [
         ok: leftSeg,
@@ -28,7 +22,12 @@ defmodule EqParser do
       ] ->
         case Enum.map([leftSeg, rightSeg], &createModel/1) do
           [{:ok, l}, {:ok, r}] ->
-            merged = Map.merge(l, r, fn _k, v1, v2 -> v1 - v2 end)
+            degreeLeft = l |> ComputerV1.getEquationDegree()
+            degreeRight = r |> ComputerV1.getEquationDegree()
+            degree = MyMath.max(degreeLeft, degreeRight)
+            left = addDegrees(l, degree)
+            right = addDegrees(r, degree)
+            merged = Map.merge(left, right, &mergeSides/3)
             {:ok, merged}
 
           _ ->
@@ -41,6 +40,10 @@ defmodule EqParser do
   end
 
   def parseEquation(d), do: {:error, %{message: "Equation must have 2 sides", data: d}}
+  
+  def mergeSides(_k, v1, v2) do
+    v1 - v2
+  end
 
   def createModel(ops) do
     l = Enum.map(ops, &parseSegment/1)
@@ -73,10 +76,9 @@ defmodule EqParser do
   end
 
   def parseSegment(%{sign: sign, segment: seg}) do
-    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)((\*)?(?<x>X)((\^)?(?<degree>\d*))?)?)$/i
+    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)((\*)?(?<x>X)((\^)?(?<degree>\d+))?)?)$/i
 
     capture = Regex.named_captures(regx, seg, capture: :all_names)
-
     case capture do
       %{"coeff" => coeff, "degree" => degree, "x" => x} -> getNumber(x, degree, sign, coeff)
       _ -> {:error, %{message: "Error while parsing equation: " <> seg}}
@@ -97,7 +99,7 @@ defmodule EqParser do
       [{i, ""}, {j, ""}] ->
         if sign == ?-, do: {:ok, %{j => i * -1}}, else: {:ok, %{j => i}}
 
-      rrr ->
+      _ ->
         :error
     end
   end

@@ -1,5 +1,5 @@
 defmodule Degree2 do
-  def resolve(%{2 => a, 1 => b, 0 => c} = e) do
+  def resolve(%{2 => _a, 1 => _b, 0 => _c} = e) do
     e |> discriminant |> solution
   end
 

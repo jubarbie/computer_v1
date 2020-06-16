@@ -1,43 +1,54 @@
 defmodule ComputerV1 do
-  def display({nb_sol, result}, prec) do
+  def display({nb_sol, result}, prec, verb) do
+    verbose("Verbose mode on", verb)
+    verbose("#{prec} decimals precision", verb)
     cond do
       result |> List.keymember?(:c, 0) ->
         IO.puts(
-          "Reduced form: #{result[:c]} * X^0 + #{result[:b]} * X^1 + #{result[:a]} * X^2 = 0"
+          "Reduced form: \e[33m#{result[:c] |> Float.round(prec)} * X^0 + #{result[:b] |> Float.round(prec)} * X^1 + #{result[:a] |> Float.round(prec)} * X^2 = 0\e[0m"
         )
-
-        IO.puts("Polynominal degree: 2")
-        IO.puts("Disciminant: #{result[:delta] |> Float.round(prec)}")
-
+        verbose("a: #{result[:a] |> Float.round(prec)}\nb: #{result[:b] |> Float.round(prec)}\nc: #{result[:c] |> Float.round(prec)}", verb)
+        IO.puts("Polynominal degree: \e[33m2\e[0m")
+        verbose("Discriminant formula: b^2 - 4ac", verb)
+        verbose("#{result[:b] |> Float.round(prec)}^2 - 4 * #{result[:a] |> Float.round(prec)} * #{result[:c] |> Float.round(prec)}", verb)
+        IO.puts("Disciminant: \e[33m#{result[:delta] |> Float.round(prec)}\e[0m")
+        case result[:delta] do
+          x when x == 0 -> verbose("Discriminant is null", verb)
+          x when x > 0 -> verbose("Discriminant is positive", verb)
+          x when x < 0 -> verbose("Discriminant is negative", verb)
+        end
       result |> List.keymember?(:b, 0) ->
-        IO.puts("Reduced form: #{result[:b]} * X^0 + #{result[:a]} * X^1 = 0")
-        IO.puts("Polynominal degree: 1")
+        IO.puts("Reduced form: \e[33m#{result[:b] |> Float.round(prec)} * X^0 + #{result[:a] |> Float.round(prec)} * X^1 = 0\e[0m")
+        IO.puts("Polynominal degree: \e[33m1\e[0m")
 
       true ->
-        IO.puts("Polynominal degree: 0")
+        IO.puts("Polynominal degree: \e[33m0\e[0m")
     end
 
     case nb_sol do
       :nosol ->
-        IO.puts("The equation has no solution")
+        IO.puts("\e[31mThe equation has no solution\e[0m")
 
       :one ->
-        IO.puts("The equation has one solution: #{result[:x] |> Float.round(prec)}")
+        IO.puts("The equation has one solution: \e[32m#{result[:x] |> Float.round(prec)}\e[0m")
 
       :two ->
         IO.puts("The equation has two solutions:")
-        IO.puts("• #{result[:x1] |> Float.round(prec)}")
-        IO.puts("• #{result[:x2] |> Float.round(prec)}")
+        IO.puts("\t• \e[32m#{result[:x1] |> Float.round(prec)}\e[0m")
+        IO.puts("\t• \e[32m#{result[:x2] |> Float.round(prec)}\e[0m")
 
       :im ->
         IO.puts("The equation has 2 complex solutions:")
-        IO.puts("• #{result[:b] / 2 * result[:a]} + i * √#{-result[:delta]} / #{2 * result[:a]}")
-        IO.puts("• #{result[:b] / 2 * result[:a]} - i * √#{-result[:delta]} / #{2 * result[:a]}")
+        IO.puts("\t• \e[32m#{(result[:b] / 2 * result[:a]) |> Float.round(prec)} + i * √#{-result[:delta] |> Float.round(prec)} / #{2 * result[:a] |> Float.round(prec)}\e[0m")
+        IO.puts("\t• \e[32m#{(result[:b] / 2 * result[:a]) |> Float.round(prec)} - i * √#{-result[:delta] |> Float.round(prec)} / #{2 * result[:a] |> Float.round(prec)}\e[0m")
 
       :all ->
-        IO.puts("The equation has an infinite number of solutions")
+        IO.puts("\e[31mThe equation has an infinite number of solutions\e[0m")
     end
   end
+
+  def verbose(say, v) when v, do: IO.puts("\e[94m#{say}\e[0m") 
+  def verbose(_say, _v), do: {} 
 
   def getEquationDegree(model) do
     model
@@ -74,8 +85,8 @@ defmodule ComputerV1.CLI do
 
   defp parse_args(args) do
     {opts, params, _} =
-      OptionParser.parse(args, switches: [precision: :integer], aliases: [p: :precision])
-
+      OptionParser.parse(args, strict: [precision: :integer, verbose: :boolean], aliases: [p: :precision, v: :verbose])
+    
     if List.keymember?(opts, :precision, 0) && (opts[:precision] < 0 || opts[:precision] > 15) do
       usage()
       System.halt(0)
@@ -92,7 +103,7 @@ defmodule ComputerV1.CLI do
         |> ErrorHandler.checkResult()
         |> ComputerV1.dispatchResolution()
         |> ErrorHandler.checkResult()
-        |> ComputerV1.display(opts[:precision] || 5)
+        |> ComputerV1.display(opts[:precision] || 5, opts[:verbose])
 
       _ ->
         usage()
@@ -102,6 +113,6 @@ defmodule ComputerV1.CLI do
   end
 
   defp usage() do
-    IO.puts("usage: computer_v1 [-p precision (0..15)] [equation]")
+    IO.puts("usage: computer_v1 [-p precision (0..15)] equation")
   end
 end

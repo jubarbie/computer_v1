@@ -1,6 +1,12 @@
 # ComputerV1
 
-**TODO: Add description**
+Computer v1 is a tiny command line equation resolver
+It can resolves up to degree 3 equations
+
+Features: 
+Very flexible parser
+Precision option
+Verbose option
 
 ## Installation
 

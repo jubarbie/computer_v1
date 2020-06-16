@@ -42,4 +42,7 @@ defmodule MyMath do
 
   def has_dec?(a), do: a - trunc(a) != 0
 
+  def max(a, b) when a > b, do: a
+  def max(a, b) when a <= b, do: b
+
 end
