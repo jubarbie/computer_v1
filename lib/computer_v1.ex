@@ -25,11 +25,14 @@ defmodule ComputerV1 do
         IO.puts("The equation has one solution: #{result[:x] |> Float.round(prec)}")
 
       :two ->
-        IO.puts(
-          "The equation has two solutions: #{result[:x1] |> Float.round(prec)} & #{
-            result[:x2] |> Float.round(prec)
-          }"
-        )
+        IO.puts("The equation has two solutions:")
+        IO.puts("• #{result[:x1] |> Float.round(prec)}")
+        IO.puts("• #{result[:x2] |> Float.round(prec)}")
+
+      :im ->
+        IO.puts("The equation has 2 complex solutions:")
+        IO.puts("• #{result[:b] / 2 * result[:a]} + i * √#{-result[:delta]} / #{2 * result[:a]}")
+        IO.puts("• #{result[:b] / 2 * result[:a]} - i * √#{-result[:delta]} / #{2 * result[:a]}")
 
       :all ->
         IO.puts("The equation has an infinite number of solutions")
@@ -37,21 +40,27 @@ defmodule ComputerV1 do
   end
 
   def getEquationDegree(model) do
-      model
-      |> Map.to_list
-      |> Enum.reduce(0, fn {k, v}, d -> if (k > d) && (v != 0), do: k, else: d end)
+    model
+    |> Map.to_list()
+    |> Enum.reduce(0, fn {k, v}, d -> if k > d && v != 0, do: k, else: d end)
   end
 
   def dispatchResolution(model) do
-      case model |> getEquationDegree() do
-          0 -> Degree0.resolve(model)
-          1 -> Degree1.resolve(model)
-          2 -> Degree2.resolve(model)
-          i ->
-              IO.puts("Polynominal degree: #{i}")
-            IO.puts("I can't solve it")
-            System.halt(0)
-        end
+    case model |> getEquationDegree() do
+      0 ->
+        Degree0.resolve(model)
+
+      1 ->
+        Degree1.resolve(model)
+
+      2 ->
+        Degree2.resolve(model)
+
+      i ->
+        IO.puts("Polynominal degree: #{i}")
+        IO.puts("I can't solve it")
+        System.halt(0)
+    end
   end
 end
 

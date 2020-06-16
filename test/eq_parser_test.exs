@@ -2,7 +2,9 @@ defmodule EqParserTest do
   use ExUnit.Case
 
   test "Equation parsing test" do
-    assert EqParser.fromString("3 * X^2 + 2 * X + 10+ 43*X2=0") == {:ok, %{2 => 46, 1 => 2, 0 => 10}}
+    assert EqParser.fromString("3 * X^2 + 2 * X + 10+ 43*X2=0") ==
+             {:ok, %{2 => 46, 1 => 2, 0 => 10}}
+
     assert EqParser.fromString("3 * X^2 + 2 * X + 10 = 3x") == {:ok, %{2 => 3, 1 => -1, 0 => 10}}
 
     assert EqParser.fromString("3*X^2+2*X+10=0=43") ==
@@ -54,7 +56,7 @@ defmodule EqParserTest do
     assert EqParser.parseSegment(%{sign: ?-, segment: "2*X^2"}) == {:ok, %{2 => -2}}
     assert EqParser.parseSegment(%{sign: ?-, segment: "-2*X^2"}) == {:ok, %{2 => 2}}
 
-    assert EqParser.parseSegment(%{sign: ?-, segment: "-2*X^3"}) ==  {:ok, %{3 => 2.0}}
+    assert EqParser.parseSegment(%{sign: ?-, segment: "-2*X^3"}) == {:ok, %{3 => 2.0}}
 
     assert EqParser.parseSegment(%{sign: ?+, segment: "-203*X^1"}) == {:ok, %{1 => -203}}
     assert EqParser.parseSegment(%{sign: ?+, segment: "23*X"}) == {:ok, %{1 => 23}}
@@ -65,16 +67,19 @@ defmodule EqParserTest do
     assert EqParser.createModel([%{sign: ?-, segment: "2X"}]) == {:ok, %{1 => -2.0}}
     assert EqParser.createModel([%{sign: ?-, segment: "2"}]) == {:ok, %{0 => -2.0}}
     assert EqParser.createModel([%{sign: ?-, segment: "2.3"}]) == {:ok, %{0 => -2.3}}
+
     assert EqParser.createModel([
              %{sign: ?-, segment: "2"},
              %{sign: ?+, segment: "2X2"},
              %{sign: ?-, segment: "2"},
              %{sign: ?+, segment: "2X^0"}
            ]) == {:ok, %{2 => 2, 0 => -2}}
+
     assert EqParser.createModel([
              %{sign: ?-, segment: "2x2"},
              %{sign: ?+, segment: "-21X"}
            ]) == {:ok, %{2 => -2, 1 => -21}}
+
     assert EqParser.createModel([
              %{sign: ?-, segment: "2"},
              %{sign: ?+, segment: "2X2"},

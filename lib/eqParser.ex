@@ -11,12 +11,13 @@ defmodule EqParser do
   def addAllDegrees({:error, e} = err), do: err
 
   def addAllDegrees({:ok, model}) do
-      degree = model |> ComputerV1.getEquationDegree
-      0..degree
-      |> Enum.map(fn d -> {d, 0} end)
-      |> Map.new
-      |> Map.merge(model)
-      |> (fn model -> {:ok, model} end).()
+    degree = model |> ComputerV1.getEquationDegree()
+
+    0..degree
+    |> Enum.map(fn d -> {d, 0} end)
+    |> Map.new()
+    |> Map.merge(model)
+    |> (fn model -> {:ok, model} end).()
   end
 
   def parseEquation([left, right] = s) do
@@ -26,9 +27,9 @@ defmodule EqParser do
         ok: rightSeg
       ] ->
         case Enum.map([leftSeg, rightSeg], &createModel/1) do
-          [{:ok, l},{:ok, r}] ->
-              merged = Map.merge(l, r, fn _k, v1, v2 -> v1 - v2 end)
-            {:ok, merged }
+          [{:ok, l}, {:ok, r}] ->
+            merged = Map.merge(l, r, fn _k, v1, v2 -> v1 - v2 end)
+            {:ok, merged}
 
           _ ->
             {:error, %{message: "Parsing error"}}
@@ -45,7 +46,7 @@ defmodule EqParser do
     l = Enum.map(ops, &parseSegment/1)
 
     if List.keymember?(l, :error, 0) do
-      {:error, %{message: "Error white parsing"}}
+      {:error, %{message: "Error while parsing"}}
     else
       l |> flatSegments
     end
@@ -53,10 +54,12 @@ defmodule EqParser do
 
   def flatSegments(l) do
     errors = Enum.filter(l, fn x -> elem(x, 0) == :error end)
-    if (length(errors) > 0) do
-        {:error, %{message: "Error while parsing"}}
+
+    if length(errors) > 0 do
+      {:error, %{message: "Error while parsing"}}
     else
-        flat = l
+      flat =
+        l
         |> Enum.filter(fn x -> elem(x, 0) == :ok end)
         |> Enum.map(fn x -> elem(x, 1) end)
         |> Enum.reduce(fn x, acc ->
@@ -64,7 +67,8 @@ defmodule EqParser do
             v1 + v2
           end)
         end)
-        {:ok, flat}
+
+      {:ok, flat}
     end
   end
 
@@ -79,14 +83,22 @@ defmodule EqParser do
     end
   end
 
-
   def getNumber(x, degree, sign, coeff) do
-      if (x == "" && degree == ""), do: degree = "0"
-      if (x != "" && degree == ""), do: degree = "1"
-      if coeff == "", do: coeff = "1"
+    degree =
+      if degree == "" do
+        if x == "", do: "0", else: "1"
+      else
+        degree
+      end
+
+    coeff = if coeff == "", do: "1", else: coeff
+
     case [Float.parse(coeff), Integer.parse(degree)] do
-      [{i, ""}, {j, ""}] -> if sign == ?-, do: {:ok, %{j => i * -1}}, else: {:ok, %{j => i}}
-      _ -> :error
+      [{i, ""}, {j, ""}] ->
+        if sign == ?-, do: {:ok, %{j => i * -1}}, else: {:ok, %{j => i}}
+
+      rrr ->
+        :error
     end
   end
 
