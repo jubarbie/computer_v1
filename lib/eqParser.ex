@@ -76,7 +76,7 @@ defmodule EqParser do
   end
 
   def parseSegment(%{sign: sign, segment: seg}) do
-    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)((\*)?(?<x>X)((\^)?(?<degree>\d+))?)?)$/i
+    regx = ~r/^((?<coeff>[+-]?\d*(\.\d*)?)((\*)?(?<x>X)((\^)?(?<degree>\d{1,5}))?)?)$/i
 
     capture = Regex.named_captures(regx, seg, capture: :all_names)
     case capture do

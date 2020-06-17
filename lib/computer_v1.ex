@@ -7,6 +7,7 @@ defmodule ComputerV1 do
         IO.puts(
           "Reduced form: \e[33m#{result[:c] |> Float.round(prec)} * X^0 + #{result[:b] |> Float.round(prec)} * X^1 + #{result[:a] |> Float.round(prec)} * X^2 = 0\e[0m"
         )
+        verbose("Natural form: \e[33m#{result[:a] |> Float.round(prec)}x\xc2\xb2 + #{result[:b] |> Float.round(prec)}x + #{result[:c] |> Float.round(prec)} = 0", verb)
         verbose("a: #{result[:a] |> Float.round(prec)}\nb: #{result[:b] |> Float.round(prec)}\nc: #{result[:c] |> Float.round(prec)}", verb)
         IO.puts("Polynominal degree: \e[33m2\e[0m")
         verbose("Discriminant formula: b^2 - 4ac", verb)
@@ -19,6 +20,7 @@ defmodule ComputerV1 do
         end
       result |> List.keymember?(:b, 0) ->
         IO.puts("Reduced form: \e[33m#{result[:b] |> Float.round(prec)} * X^0 + #{result[:a] |> Float.round(prec)} * X^1 = 0\e[0m")
+        verbose("Natural form: \e[33m#{result[:a] |> Float.round(prec)}x + #{result[:b] |> Float.round(prec)} = 0", verb)
         IO.puts("Polynominal degree: \e[33m1\e[0m")
 
       true ->
@@ -85,10 +87,15 @@ defmodule ComputerV1.CLI do
 
   defp parse_args(args) do
     {opts, params, _} =
-      OptionParser.parse(args, strict: [precision: :integer, verbose: :boolean], aliases: [p: :precision, v: :verbose])
+      OptionParser.parse(args, strict: [precision: :integer, verbose: :boolean, help: :boolean], aliases: [p: :precision, v: :verbose, h: :help])
     
     if List.keymember?(opts, :precision, 0) && (opts[:precision] < 0 || opts[:precision] > 15) do
       usage()
+      System.halt(0)
+    end
+
+    if List.keymember?(opts, :help, 0) do
+      help()
       System.halt(0)
     end
 
@@ -113,6 +120,27 @@ defmodule ComputerV1.CLI do
   end
 
   defp usage() do
-    IO.puts("usage: computer_v1 [-p precision (0..15)] equation")
+    IO.puts("usage: computer_v1 [-hpv] equation")
+  end
+
+  defp help() do
+    IO.puts("\e[1mNAME\e[0m")
+    IO.puts("\tcomputer_v1 \e[37m-- Equation solver up to degree 2\e[0m")
+    IO.puts("")
+    IO.puts("\e[1mSYNOPSIS\e[0m")
+    IO.puts("\tcomputer_v1 \e[37m[\e[0m-hpv\e[37m] equation\e[0m")
+    IO.puts("")
+    IO.puts("\e[1mDESCRIPTION\e[0m")
+    IO.puts("\tcomputer_v1\e[37m is an equation solver able to solve up to degree 2 equation\e[0m")
+    IO.puts("\t\e[37mThe equation given as a string can be written in many different forms, see exemples\e[0m")
+    IO.puts("\t-h\e[37m\tHelp\e[0m")
+    IO.puts("\t-p\e[37m\tSpecify a decimal precision (from 1 to 15)\e[0m")
+    IO.puts("\t-v\e[37m\tVerbose mode\e[0m")
+    IO.puts("")
+    IO.puts("\e[1mEXAMPLES\e[0m")
+    IO.puts("\t\e[37mcomputer_v1 \"3 * X^2 + 2 * X + 1 = 0\"\e[0m")
+    IO.puts("\t\e[37mcomputer_v1 \"3X^2 + 2X + 1 = 0\"\e[0m")
+    IO.puts("\t\e[37mcomputer_v1 \"3X2 + 2X + 1 = 0\"\e[0m")
+    IO.puts("\t\e[37mcomputer_v1 \"3X2+2X+1=0\"\e[0m")
   end
 end
