@@ -1,8 +1,9 @@
 defmodule EqParser do
   def fromString(str) do
-    # Removing all spaces
+    # Removing all spaces and double signs
     str
     |> String.replace(~r/\s+/, "")
+    |> String.replace(["+-","-+"], "-")
     |> String.split("=")
     |> parseEquation
   end
