@@ -19,7 +19,7 @@ defmodule Degree2 do
   end
 
   def solution(delta: delta, a: a, b: b, c: c) when delta == 0 do
-    x = -b / 2 * a
+    x = -b / (2 * a)
     {:ok, {:one, [delta: delta, a: a, b: b, c: c, x: x]}}
   end
 
