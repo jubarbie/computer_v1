@@ -43,14 +43,14 @@ defmodule ComputerV1 do
 
       :two ->
         IO.puts("The equation has two solutions:")
-        IO.puts("\t• -#{result[:b]} - √#{fraction(result[:delta], 2 * result[:a], frac)} = \e[32m#{result[:x1]}\e[0m")
-        IO.puts("\t• -#{result[:b]} + √#{fraction(result[:delta], 2 * result[:a], frac)} = \e[32m#{result[:x2]}\e[0m")
+        IO.puts("\t• #{-result[:b]} - √#{fraction(result[:delta], 2 * result[:a], frac)} = \e[32m#{result[:x1]}\e[0m")
+        IO.puts("\t• #{-result[:b]} + √#{fraction(result[:delta], 2 * result[:a], frac)} = \e[32m#{result[:x2]}\e[0m")
 
       :im ->
         IO.puts("The equation has 2 complex solutions:")
         verbose("Irreductible fraction: -#{result[:b]} - √#{result[:delta]}/#{2 * result[:a]}", verb)
-        IO.puts("\t• \e[32m#{(result[:b] / 2 * result[:a])} + i * √#{-result[:delta]} / #{2 * result[:a]}\e[0m")
-        IO.puts("\t• \e[32m#{(result[:b] / 2 * result[:a])} - i * √#{-result[:delta]} / #{2 * result[:a]}\e[0m")
+        IO.puts("\t• \e[32m#{fraction(result[:b], 2 * result[:a], frac)} + i * √#{fraction(-result[:delta], 2 * result[:a], frac)}\e[0m")
+        IO.puts("\t• \e[32m#{fraction(result[:b], 2 * result[:a], frac)} - i * √#{fraction(-result[:delta], 2 * result[:a], frac)}\e[0m")
 
       :all ->
         IO.puts("\e[32mAll real numbers are solution\e[0m")
