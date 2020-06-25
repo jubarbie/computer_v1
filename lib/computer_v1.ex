@@ -46,7 +46,7 @@ defmodule ComputerV1 do
         IO.puts("\t• \e[32m#{(result[:b] / 2 * result[:a])} - i * √#{-result[:delta]} / #{2 * result[:a]}\e[0m")
 
       :all ->
-        IO.puts("\e[31mAll real numbers are solution\e[0m")
+        IO.puts("\e[32mAll real numbers are solution\e[0m")
     end
   end
 
