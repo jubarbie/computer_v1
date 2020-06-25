@@ -65,7 +65,7 @@ defmodule ComputerV1 do
     end
   end
 
-  def fraction(a, b, frac), do: "#{a}/#{b}"
+  def fraction(a, b, _frac), do: "#{a}/#{b}"
 
   def verbose(say, v) when v, do: IO.puts("\e[94m#{say}\e[0m") 
   def verbose(_say, _v), do: {} 
