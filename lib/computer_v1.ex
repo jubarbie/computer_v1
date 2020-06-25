@@ -142,8 +142,12 @@ defmodule ComputerV1.CLI do
   end
 
   defp response({opts, params}) do
-    case length(params) do
-      1 ->
+    cond do
+      length(params) == 0 ->
+        eq = IO.read(:stdio, :line)
+        response({opts, [eq]})
+
+      length(params) == 1 ->
         List.first(params)
         |> EqParser.fromString()
         |> ErrorHandler.checkResult()
@@ -151,7 +155,7 @@ defmodule ComputerV1.CLI do
         |> ErrorHandler.checkResult()
         |> ComputerV1.display(opts[:precision] || 5, opts[:verbose], opts[:fraction])
 
-      _ ->
+      length(params) > 1 ->
         usage()
     end
 
