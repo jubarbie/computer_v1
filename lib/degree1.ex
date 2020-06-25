@@ -6,7 +6,7 @@ defmodule Degree1 do
   def resolve(_), do: {:error, %{message: "Bad argument given to degree 1 resolve"}}
 
   def solution(a: a, b: b) do
-    {:ok, {:one, [a: a, b: b, x: b / a]}}
+    {:ok, {:one, [a: a, b: b, x: b / -a]}}
   end
 
   def solution(_), do: {:error, %{message: "Bad argument given to degree 1 solution"}}

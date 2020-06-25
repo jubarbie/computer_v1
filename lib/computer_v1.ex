@@ -1,6 +1,6 @@
 defmodule ComputerV1 do
   def display({nb_sol, res}, prec, verb) do
-    result = Enum.map(res, fn {k, v} -> {k, Float.round(v, prec)} end)
+    result = Enum.map(res, fn {k, v} -> {k, Float.round(v/1, prec)} end)
     verbose("Verbose mode on", verb)
     verbose("#{prec} decimals precision", verb)
     cond do
