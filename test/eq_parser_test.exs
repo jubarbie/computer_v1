@@ -14,7 +14,7 @@ defmodule EqParserTest do
              {:error, %{message: "Equation must have 2 sides", data: ["3*X^2+2*X-10"]}}
 
     assert EqParser.fromString("X^2+2*X-10 = 0") == {:ok, %{2 => 1, 1 => 2, 0 => -10}}
-    assert EqParser.fromString("2*X-10=2x2+-12") == {:error, %{message: "Parsing error"}}
+    assert EqParser.fromString("2*X-10=2x2+-12") == {:ok, %{2 => -2, 1 => 2, 0 => 2}}
     assert EqParser.fromString("-32*X-10+2X2=2x2+12") == {:ok, %{2 => 0, 1 => -32, 0 => -22}}
     assert EqParser.fromString("-32*X-10+2.3X2=+12") == {:ok, %{2 => 2.3, 1 => -32, 0 => -22}}
   end
