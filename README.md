@@ -11,8 +11,7 @@ Features:
 
 # Installation
 
-First install Elixir
-[Elixir installation page](https://elixir-lang.org/install.html)
+First install Elixir. [Elixir installation page](https://elixir-lang.org/install.html)
 
 Then build the project using the `make` command
 
