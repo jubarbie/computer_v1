@@ -4,6 +4,7 @@ defmodule EqParser do
     str
     |> String.replace(~r/\s+/, "")
     |> String.replace(["+-","-+"], "-")
+    |> String.replace(",", ".")
     |> String.split("=")
     |> parseEquation
   end

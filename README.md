@@ -7,6 +7,7 @@ Features:
 - Flexible parser
 - Precision option from 0 to 15 decimals
 - Verbose option to see more details while equation is being resolved
+- Display irreductible fractions if relevant
 
 
 # Installation

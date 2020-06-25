@@ -45,4 +45,22 @@ defmodule MyMath do
   def max(a, b) when a > b, do: a
   def max(a, b) when a <= b, do: b
 
+  def min(a, b) when a > b, do: b
+  def min(a, b) when a <= b, do: a
+
+  def find_irreductible(%{a: a, b: b}) when abs(a) == abs(b), do: {:ok, {:num, trunc(a / b)}}
+  def find_irreductible(%{a: a, b: b}) when a - trunc(a) != 0 or b - trunc(b) != 0, do: {:error, {:message, "numbers must be intergers"}}
+  def find_irreductible(%{a: a, b: b}) when rem(trunc(a), trunc(b)) == 0, do: {:ok, {:num, div(trunc(a), trunc(b))}}
+  def find_irreductible(%{a: a, b: b}) do
+    g = gcd(trunc(a), trunc(b))
+    {:ok, {:frac, %{a: div(trunc(a), g), b: div(trunc(b), g)}}}
+  end
+  def gcd(a, b) when abs(a) == abs(b), do: abs(a) 
+  def gcd(a, b) when abs(a) < abs(b), do: gcd(abs(b), abs(a))
+  def gcd(a, b) when b == 0, do: abs(a)
+  def gcd(a, b) do
+    gcd(abs(b), rem(abs(a), abs(b)))
+  end
+
+  def is_whole?(n), do: n - trunc(n) == 0
 end
