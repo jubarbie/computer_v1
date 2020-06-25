@@ -20,4 +20,4 @@ Then build the project using the `make` command
 
 `computer_v1 "2X^2 + 2X - 5 = 0"` 
 
-Use `computer_v1 -h` for help
+Use `computer_v1 -h` for more help
